@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 
 # Import custom modules
-from train_models import train_all_models
+from train_models import train_models
 from eda_utils import plot_resampling, plot_rolling, plot_decomposition
 
 # --------------------------
@@ -52,7 +52,7 @@ if uploaded_file:
 
     if st.button("Run Forecasting"):
         with st.spinner("Training models... this may take a while ⏳"):
-            results_df, predictions = train_all_models(df, features)
+            results_df, predictions = train_models(df, features)
 
         st.success("✅ Forecasting completed!")
 
@@ -87,3 +87,4 @@ if uploaded_file:
                     file_name=f"{model}_{feature}_predictions.csv",
                     mime="text/csv"
                 )
+
