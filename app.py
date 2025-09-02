@@ -5,7 +5,7 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 
 # Import custom modules
-from train_models import train_all_models
+from train_models import train_models
 from eda_utils import plot_resampling, plot_rolling, plot_decomposition, plot_stock_trends
 
 # --------------------------
@@ -71,3 +71,4 @@ if uploaded_file is not None:
                 fig.add_scatter(x=x, y=pd.Series(y_pred).squeeze(),
                                 mode="lines", name="Prediction")
                 st.plotly_chart(fig, use_container_width=True)
+
