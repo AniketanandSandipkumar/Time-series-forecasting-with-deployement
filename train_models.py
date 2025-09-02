@@ -142,3 +142,4 @@ def train_all_models(df, features, models_to_run=None, test_ratio=0.2):
     results_df = pd.DataFrame(results, columns=["Model", "Feature", "RMSE", "MAE", "MAPE"])
     return results_df, predictions
 
+
