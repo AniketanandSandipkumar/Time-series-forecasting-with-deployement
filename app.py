@@ -1,90 +1,110 @@
 # app.py
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 import plotly.express as px
+import matplotlib.pyplot as plt
 
 # Import custom modules
-from train_models import train_models
+from train_models import train_models   # updated import
 from eda_utils import plot_resampling, plot_rolling, plot_decomposition
+
 
 # --------------------------
 # Streamlit Layout
 # --------------------------
-st.set_page_config(page_title="Stock Time Series Forecasting", layout="wide")
+st.set_page_config(page_title="Stock Forecasting", layout="wide")
+st.title("📈 Time Series Forecasting Dashboard")
 
-st.title("📈 Stock Time Series Forecasting Dashboard")
 
-# Upload dataset
-uploaded_file = st.file_uploader("Upload your stock dataset (CSV)", type=["csv"])
+# --------------------------
+# File Upload
+# --------------------------
+uploaded_file = st.sidebar.file_uploader("Upload Stock CSV", type=["csv"])
 if uploaded_file:
-    df = pd.read_csv(uploaded_file, parse_dates=["Date"], index_col="Date")
-    df = df.sort_index()
+    df = pd.read_csv(uploaded_file, parse_dates=True, index_col=0)
 
     # --------------------------
-    # Data exploration
+    # Dataset View with Date Filter
     # --------------------------
-    st.subheader("🔍 Data Overview")
-
-    # Date picker for full dataset
+    st.subheader("📂 Dataset Viewer")
     min_date, max_date = df.index.min(), df.index.max()
-    start_date = st.date_input("Choose start date to view dataset",
-                               value=min_date,
-                               min_value=min_date,
-                               max_value=max_date)
-
+    start_date = st.date_input(
+        "Choose start date",
+        value=min_date,
+        min_value=min_date,
+        max_value=max_date
+    )
     df_filtered = df.loc[start_date:]
-    st.dataframe(df_filtered)   # Show full dataset from selected date
-
-    st.write("### 📊 Quick EDA")
-    st.plotly_chart(plot_resampling(df), use_container_width=True)
-    st.plotly_chart(plot_rolling(df), use_container_width=True)
-
-    feature_for_decomp = st.selectbox("Choose feature for decomposition", df.columns)
-    st.plotly_chart(plot_decomposition(df, feature_for_decomp), use_container_width=True)
+    st.dataframe(df_filtered)
 
     # --------------------------
-    # Model Training & Forecasting
+    # Sidebar Options
     # --------------------------
-    st.subheader("🤖 Model Training & Forecasting")
+    features = st.sidebar.multiselect(
+        "Select Features for Forecasting",
+        options=df.columns.tolist(),
+        default=["Close"]
+    )
 
-    features = st.multiselect("Select features to forecast", df.columns.tolist(), default=["Close"])
+    models_to_run = st.sidebar.multiselect(
+        "Select Models",
+        ["ARIMA", "SARIMA", "Prophet", "LSTM"],
+        default=["ARIMA"]  # let’s start with ARIMA by default
+    )
 
-    if st.button("Run Forecasting"):
-        with st.spinner("Training models... this may take a while ⏳"):
-            results_df, predictions = train_models(df, features)
+    test_ratio = st.sidebar.slider("Test Data Ratio", 0.1, 0.4, 0.2, step=0.05)
 
-        st.success("✅ Forecasting completed!")
+    if st.sidebar.button("Run Forecasting"):
+        with st.spinner("Training selected models..."):
+            results_df, predictions = train_models(df, features, models_to_run=models_to_run, test_ratio=test_ratio)
 
-        # Show results
-        st.subheader("📑 Model Evaluation Results")
+        st.success("Forecasting complete ✅")
+
+        # --------------------------
+        # Show Results
+        # --------------------------
+        st.subheader("📊 Model Evaluation Results")
         st.dataframe(results_df)
 
-        # --------------------------
-        # Forecast Plots + Download
-        # --------------------------
+        # Plot actual vs predicted
         for feature in features:
-            st.write(f"### 🔮 Predictions for {feature}")
-            for model, (x, y_true, y_pred) in predictions[feature].items():
-                fig = px.line(x=x, y=[y_true.flatten(), y_pred.flatten()],
-                              labels={"x": "Date", "y": feature},
-                              title=f"{model} Predictions for {feature}")
-                fig.update_traces(mode="lines")
-                fig.data[0].name = "Actual"
-                fig.data[1].name = "Predicted"
-                st.plotly_chart(fig, use_container_width=True)
+            st.subheader(f"Feature: {feature}")
+            for model_name, (x, actual, pred) in predictions[feature].items():
+                fig, ax = plt.subplots(figsize=(12, 5))
+                ax.plot(x, actual, label="Actual", color="black")
+                ax.plot(x, pred, label=f"{model_name} Prediction")
+                ax.legend()
+                st.pyplot(fig)
 
-                # Add download button for forecasted data
-                pred_df = pd.DataFrame({
-                    "Date": x,
-                    "Actual": y_true.flatten(),
-                    "Predicted": y_pred.flatten()
-                })
-                csv_preds = pred_df.to_csv(index=False).encode("utf-8")
-                st.download_button(
-                    f"📥 Download {model} Predictions for {feature}",
-                    data=csv_preds,
-                    file_name=f"{model}_{feature}_predictions.csv",
-                    mime="text/csv"
-                )
+            # --------------------------
+            # Download Forecasted Data
+            # --------------------------
+            forecast_df = pd.DataFrame({
+                "Date": x,
+                "Actual": actual,
+                "Predicted": pred
+            })
+            csv = forecast_df.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                label=f"📥 Download {feature} Forecasted Data",
+                data=csv,
+                file_name=f"{feature}_forecast.csv",
+                mime="text/csv"
+            )
+
+    # --------------------------
+    # EDA Tools
+    # --------------------------
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("🔍 Exploratory Data Analysis")
+
+    if st.sidebar.checkbox("Show Resampling (Monthly Mean)"):
+        st.plotly_chart(plot_resampling(df), use_container_width=True)
+
+    if st.sidebar.checkbox("Show Rolling Mean (30 days)"):
+        st.plotly_chart(plot_rolling(df), use_container_width=True)
+
+    if st.sidebar.checkbox("Show Decomposition (Trend/Seasonality/Residuals)"):
+        feature_for_decomp = st.sidebar.selectbox("Select Feature for Decomposition", df.columns.tolist())
+        st.plotly_chart(plot_decomposition(df, feature_for_decomp), use_container_width=True)
 
