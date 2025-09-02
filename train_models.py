@@ -1,4 +1,4 @@
-import numpy as np 
+import numpy as np
 import pandas as pd
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.statespace.sarimax import SARIMAX
@@ -10,28 +10,31 @@ from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.keras.preprocessing.sequence import TimeseriesGenerator
 
 
+# --------------------------
+# Evaluation helper
+# --------------------------
 def evaluate_forecast(true, pred):
-    """Compute RMSE, MAE, MAPE"""
     rmse = np.sqrt(mean_squared_error(true, pred))
     mae = mean_absolute_error(true, pred)
     mape = np.mean(np.abs((true - pred) / true)) * 100
     return rmse, mae, mape
 
 
+# --------------------------
+# Individual models
+# --------------------------
 def run_arima(train, test, order=(1,1,1)):
     model = ARIMA(train, order=order)
     model_fit = model.fit()
     pred = model_fit.forecast(len(test))
-    rmse, mae, mape = evaluate_forecast(test.values, pred.values)
-    return pred, rmse, mae, mape
+    return pred
 
 
 def run_sarima(train, test, order=(0,0,18), seasonal_order=(0,1,0,18)):
     model = SARIMAX(train, order=order, seasonal_order=seasonal_order)
     model_fit = model.fit(disp=False)
     pred = model_fit.forecast(len(test))
-    rmse, mae, mape = evaluate_forecast(test.values, pred.values)
-    return pred, rmse, mae, mape
+    return pred
 
 
 def run_prophet(train_df, test_df):
@@ -39,13 +42,10 @@ def run_prophet(train_df, test_df):
     model.fit(train_df)
     future = model.make_future_dataframe(periods=len(test_df))
     forecast = model.predict(future)
-    preds = forecast["yhat"].iloc[-len(test_df):].values
-    rmse, mae, mape = evaluate_forecast(test_df["y"].values, preds)
-    return preds, rmse, mae, mape
+    return forecast["yhat"].iloc[-len(test_df):].values
 
 
 def run_lstm(train, test, n_input=18, epochs=5):
-    print("⚠️ Note: LSTM training can take longer than ARIMA/SARIMA/Prophet.")
     scaler = MinMaxScaler(feature_range=(0,1))
     scaled_train = scaler.fit_transform(train)
     scaled_test = scaler.transform(test)
@@ -63,24 +63,32 @@ def run_lstm(train, test, n_input=18, epochs=5):
     test_predictions = []
     current_batch = scaled_train[-n_input:].reshape((1, n_input, n_features))
 
-    for i in range(len(test)):
+    for _ in range(len(test)):
         current_pred = model.predict(current_batch, verbose=0)[0]
         test_predictions.append(current_pred)
         current_batch = np.append(current_batch[:,1:,:], [[current_pred]], axis=1)
 
-    preds = scaler.inverse_transform(np.array(test_predictions).reshape(-1,1))
-    rmse, mae, mape = evaluate_forecast(test.values, preds)
-    return preds, rmse, mae, mape
+    return scaler.inverse_transform(np.array(test_predictions).reshape(-1,1))
 
 
-def train_all_models(df, features, models_to_run=None, test_ratio=0.2):
+# --------------------------
+# Main training function
+# --------------------------
+def train_models(df, features, models_to_run=None, test_ratio=0.2):
     """
-    Train selected models (ARIMA, SARIMA, Prophet, LSTM) for each feature.
-    Prints results instantly after each model completes.
-    Returns final results_df and predictions dict.
+    Train selected models for each feature.
     
-    models_to_run: list of model names (e.g., ["ARIMA", "Prophet"])
+    Args:
+        df (pd.DataFrame): stock data
+        features (list): list of features e.g. ["Open","Close"]
+        models_to_run (list): subset of ["ARIMA","SARIMA","Prophet","LSTM"]
+        test_ratio (float): test size
+
+    Returns:
+        results_df (pd.DataFrame)
+        predictions (dict)
     """
+
     if models_to_run is None:
         models_to_run = ["ARIMA", "SARIMA", "Prophet", "LSTM"]
 
@@ -94,52 +102,54 @@ def train_all_models(df, features, models_to_run=None, test_ratio=0.2):
         series = df[[feature]].dropna()
         split = int(len(series) * (1 - test_ratio))
         train, test = series[:split], series[split:]
-
         predictions[feature] = {}
 
-        # ARIMA
+        # ---------------- ARIMA ----------------
         if "ARIMA" in models_to_run:
             try:
-                pred, rmse, mae, mape = run_arima(train, test)
+                pred = run_arima(train, test)
+                rmse, mae, mape = evaluate_forecast(test.values, pred.values)
                 results.append(["ARIMA", feature, rmse, mae, mape])
                 predictions[feature]["ARIMA"] = (test.index, test.values, pred)
-                print(f"✅ ARIMA done for {feature}: RMSE={rmse:.4f}, MAE={mae:.4f}, MAPE={mape:.2f}%")
+                print(f"✅ ARIMA finished for {feature} (RMSE={rmse:.2f})")
             except Exception as e:
                 print(f"❌ ARIMA failed for {feature}: {e}")
 
-        # SARIMA
+        # ---------------- SARIMA ----------------
         if "SARIMA" in models_to_run:
             try:
-                pred, rmse, mae, mape = run_sarima(train, test)
+                pred = run_sarima(train, test)
+                rmse, mae, mape = evaluate_forecast(test.values, pred.values)
                 results.append(["SARIMA", feature, rmse, mae, mape])
                 predictions[feature]["SARIMA"] = (test.index, test.values, pred)
-                print(f"✅ SARIMA done for {feature}: RMSE={rmse:.4f}, MAE={mae:.4f}, MAPE={mape:.2f}%")
+                print(f"✅ SARIMA finished for {feature} (RMSE={rmse:.2f})")
             except Exception as e:
                 print(f"❌ SARIMA failed for {feature}: {e}")
 
-        # Prophet
+        # ---------------- Prophet ----------------
         if "Prophet" in models_to_run:
             try:
                 df_fb = pd.DataFrame({"ds": series.index, "y": series[feature]})
                 df_train, df_test = df_fb.iloc[:split], df_fb.iloc[split:]
-                preds, rmse, mae, mape = run_prophet(df_train, df_test)
+                preds = run_prophet(df_train, df_test)
+                rmse, mae, mape = evaluate_forecast(df_test["y"].values, preds)
                 results.append(["Prophet", feature, rmse, mae, mape])
                 predictions[feature]["Prophet"] = (df_test["ds"], df_test["y"], preds)
-                print(f"✅ Prophet done for {feature}: RMSE={rmse:.4f}, MAE={mae:.4f}, MAPE={mape:.2f}%")
+                print(f"✅ Prophet finished for {feature} (RMSE={rmse:.2f})")
             except Exception as e:
                 print(f"❌ Prophet failed for {feature}: {e}")
 
-        # LSTM
+        # ---------------- LSTM ----------------
         if "LSTM" in models_to_run:
+            print("⚠️ LSTM may take longer to train, please wait...")
             try:
-                preds, rmse, mae, mape = run_lstm(train, test)
+                preds = run_lstm(train, test)
+                rmse, mae, mape = evaluate_forecast(test.values, preds)
                 results.append(["LSTM", feature, rmse, mae, mape])
                 predictions[feature]["LSTM"] = (test.index, test.values, preds)
-                print(f"✅ LSTM done for {feature}: RMSE={rmse:.4f}, MAE={mae:.4f}, MAPE={mape:.2f}%")
+                print(f"✅ LSTM finished for {feature} (RMSE={rmse:.2f})")
             except Exception as e:
                 print(f"❌ LSTM failed for {feature}: {e}")
 
     results_df = pd.DataFrame(results, columns=["Model", "Feature", "RMSE", "MAE", "MAPE"])
     return results_df, predictions
-
-
