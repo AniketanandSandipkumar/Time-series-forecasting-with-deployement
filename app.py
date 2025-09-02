@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # Import custom modules
 from train_models import train_all_models
-from eda_utils import plot_resampled, plot_rolling, plot_decomposition
+from eda_utils import plot_resampling, plot_rolling, plot_decomposition, plot_stock_trends
 
 # --------------------------
 # Streamlit Layout
@@ -28,9 +28,7 @@ if uploaded_file is not None:
     st.write(df.head())
 
     # Plot Closing Price trend
-    st.subheader("📈 Stock Closing Price Trend")
-    fig = px.line(df, x=df.index, y="Close", title="Closing Price Over Time")
-    st.plotly_chart(fig, use_container_width=True)
+    plot_stock_trends(df, "Close")
 
     # --------------------------
     # EDA Section
@@ -40,19 +38,13 @@ if uploaded_file is not None:
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.write("Resampled (Monthly)")
-        fig1 = plot_resampled(df, "Close", rule="M")
-        st.pyplot(fig1)
+        plot_resampling(df, "Close")
 
     with col2:
-        st.write("Rolling Mean & Std")
-        fig2 = plot_rolling(df, "Close", window=30)
-        st.pyplot(fig2)
+        plot_rolling(df, "Close", window=30)
 
     with col3:
-        st.write("Decomposition (Trend/Seasonality/Residuals)")
-        fig3 = plot_decomposition(df, "Close", model="additive", freq=30)
-        st.pyplot(fig3)
+        plot_decomposition(df, "Close", period=30)
 
     # --------------------------
     # Model Training & Results
@@ -73,7 +65,9 @@ if uploaded_file is not None:
         for feature in predictions.keys():
             st.markdown(f"### Feature: **{feature}**")
             for model_name, (x, y_true, y_pred) in predictions[feature].items():
-                fig = px.line(x=x, y=y_true.squeeze(), labels={'x':'Date','y':'Value'}, title=f"{model_name} - {feature}")
-                fig.add_scatter(x=x, y=pd.Series(y_pred).squeeze(), mode="lines", name="Prediction")
+                fig = px.line(x=x, y=pd.Series(y_true).squeeze(),
+                              labels={'x': 'Date', 'y': 'Value'},
+                              title=f"{model_name} - {feature}")
+                fig.add_scatter(x=x, y=pd.Series(y_pred).squeeze(),
+                                mode="lines", name="Prediction")
                 st.plotly_chart(fig, use_container_width=True)
-
