@@ -79,18 +79,24 @@ if uploaded_file:
             # --------------------------
             # Download Forecasted Data
             # --------------------------
-            forecast_df = pd.DataFrame({
-                "Date": x,
-                "Actual": actual,
-                "Predicted": pred
+            # Build downloadable DataFrame
+            y_true = y_true.flatten() if hasattr(y_true, "flatten") else y_true
+            y_pred = y_pred.flatten() if hasattr(y_pred, "flatten") else y_pred
+
+            pred_df = pd.DataFrame({
+              "Date": pd.to_datetime(x),
+              "Actual": y_true,
+              "Predicted": y_pred
             })
-            csv = forecast_df.to_csv(index=False).encode("utf-8")
+
+            csv_preds = pred_df.to_csv(index=False).encode("utf-8")
             st.download_button(
-                label=f"📥 Download {feature} Forecasted Data",
-                data=csv,
-                file_name=f"{feature}_forecast.csv",
-                mime="text/csv"
+            f"📥 Download {model} Predictions for {feature}",
+            csv_preds,
+            file_name=f"{feature}_{model}_predictions.csv",
+            mime="text/csv"
             )
+
 
     # --------------------------
     # EDA Tools
@@ -107,4 +113,5 @@ if uploaded_file:
     if st.sidebar.checkbox("Show Decomposition (Trend/Seasonality/Residuals)"):
         feature_for_decomp = st.sidebar.selectbox("Select Feature for Decomposition", df.columns.tolist())
         st.plotly_chart(plot_decomposition(df, feature_for_decomp), use_container_width=True)
+
 
