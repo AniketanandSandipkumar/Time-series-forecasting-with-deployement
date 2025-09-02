@@ -79,23 +79,20 @@ if uploaded_file:
             # --------------------------
             # Download Forecasted Data
             # --------------------------
-            # Build downloadable DataFrame
-            y_true = y_true.flatten() if hasattr(y_true, "flatten") else y_true
-            y_pred = y_pred.flatten() if hasattr(y_pred, "flatten") else y_pred
-
-            pred_df = pd.DataFrame({
-              "Date": pd.to_datetime(x),
-              "Actual": y_true,
-              "Predicted": y_pred
+  
+            forecast_df = pd.DataFrame({
+                "Date": x,
+                "Actual": actual.flatten() if hasattr(actual, "flatten") else actual,
+                "Predicted": pred.flatten() if hasattr(pred, "flatten") else pred
             })
-
-            csv_preds = pred_df.to_csv(index=False).encode("utf-8")
+            csv_preds = forecast_df.to_csv(index=False).encode("utf-8")
             st.download_button(
-            f"📥 Download {model} Predictions for {feature}",
-            csv_preds,
-            file_name=f"{feature}_{model}_predictions.csv",
-            mime="text/csv"
+                f"📥 Download {model_name} Predictions for {feature}",
+                csv_preds,
+                f"{model_name}_{feature}_predictions.csv",
+                "text/csv"
             )
+
 
 
     # --------------------------
@@ -113,5 +110,6 @@ if uploaded_file:
     if st.sidebar.checkbox("Show Decomposition (Trend/Seasonality/Residuals)"):
         feature_for_decomp = st.sidebar.selectbox("Select Feature for Decomposition", df.columns.tolist())
         st.plotly_chart(plot_decomposition(df, feature_for_decomp), use_container_width=True)
+
 
 
