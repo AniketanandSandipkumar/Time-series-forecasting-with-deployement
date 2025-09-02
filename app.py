@@ -5,71 +5,64 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 
 # Import custom modules
-from train_models import train_models
-from eda_utils import plot_resampling, plot_rolling, plot_decomposition, plot_stock_trends
+from train_models import train_models   # updated import
+from eda_utils import plot_resampling, plot_rolling, plot_decomposition
 
-# --------------------------
-# Streamlit Layout
-# --------------------------
-st.set_page_config(page_title="Stock Forecasting App", layout="wide")
-st.title("📈 Time Series Forecasting with ARIMA, SARIMA, Prophet & LSTM")
+st.set_page_config(page_title="Stock Forecasting", layout="wide")
+st.title("📈 Time Series Forecasting Dashboard")
 
-# Sidebar for user input
-st.sidebar.header("User Options")
-uploaded_file = st.sidebar.file_uploader("Upload Stock Data (CSV)", type=["csv"])
-default_features = ["Open", "High", "Low", "Close", "Volume"]
+uploaded_file = st.sidebar.file_uploader("Upload Stock CSV", type=["csv"])
+if uploaded_file:
+    df = pd.read_csv(uploaded_file, parse_dates=True, index_col=0)
+    st.subheader("Raw Data Preview")
+    st.dataframe(df.head())
 
-# --------------------------
-# Load Dataset
-# --------------------------
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file, parse_dates=["Date"], index_col="Date")
-    st.subheader("📊 Raw Data")
-    st.write(df.head())
+   
+    features = st.sidebar.multiselect(
+        "Select Features for Forecasting",
+        options=df.columns.tolist(),
+        default=["Close"]
+    )
 
-    # Plot Closing Price trend
-    plot_stock_trends(df, "Close")
+    models_to_run = st.sidebar.multiselect(
+        "Select Models",
+        ["ARIMA", "SARIMA", "Prophet", "LSTM"],
+        default=["ARIMA"]  # let’s start with ARIMA by default
+    )
 
-    # --------------------------
-    # EDA Section
-    # --------------------------
-    st.subheader("🔎 Exploratory Data Analysis")
+    test_ratio = st.sidebar.slider("Test Data Ratio", 0.1, 0.4, 0.2, step=0.05)
 
-    col1, col2, col3 = st.columns(3)
+    if st.sidebar.button("Run Forecasting"):
+        with st.spinner("Training selected models..."):
+            results_df, predictions = train_models(df, features, models_to_run=models_to_run, test_ratio=test_ratio)
 
-    with col1:
-        plot_resampling(df, "Close")
+        st.success("Forecasting complete ✅")
 
-    with col2:
-        plot_rolling(df, "Close", window=30)
-
-    with col3:
-        plot_decomposition(df, "Close", period=30)
-
-    # --------------------------
-    # Model Training & Results
-    # --------------------------
-    st.subheader("🤖 Model Training & Evaluation")
-
-    if st.button("Run All Models"):
-        with st.spinner("Training models... this may take a while ⏳"):
-            results_df, predictions = train_models(df, default_features)
-
-        st.success("✅ Training complete!")
-
-        st.write("📊 Model Performance Metrics")
+      
+        st.subheader("📊 Model Evaluation Results")
         st.dataframe(results_df)
 
-        # Visualization of predictions
-        st.subheader("📉 Model Predictions vs Actuals")
-        for feature in predictions.keys():
-            st.markdown(f"### Feature: **{feature}**")
-            for model_name, (x, y_true, y_pred) in predictions[feature].items():
-                fig = px.line(x=x, y=pd.Series(y_true).squeeze(),
-                              labels={'x': 'Date', 'y': 'Value'},
-                              title=f"{model_name} - {feature}")
-                fig.add_scatter(x=x, y=pd.Series(y_pred).squeeze(),
-                                mode="lines", name="Prediction")
-                st.plotly_chart(fig, use_container_width=True)
+        # Plot actual vs predicted
+        for feature in features:
+            st.subheader(f"Feature: {feature}")
+            for model_name, (x, actual, pred) in predictions[feature].items():
+                fig, ax = plt.subplots(figsize=(12, 5))
+                ax.plot(x, actual, label="Actual", color="black")
+                ax.plot(x, pred, label=f"{model_name} Prediction")
+                ax.legend()
+                st.pyplot(fig)
 
+  
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("🔍 Exploratory Data Analysis")
+
+    if st.sidebar.checkbox("Show Resampling (Monthly Mean)"):
+        st.plotly_chart(plot_resampling(df), use_container_width=True)
+
+    if st.sidebar.checkbox("Show Rolling Mean (30 days)"):
+        st.plotly_chart(plot_rolling(df), use_container_width=True)
+
+    if st.sidebar.checkbox("Show Decomposition (Trend/Seasonality/Residuals)"):
+        feature_for_decomp = st.sidebar.selectbox("Select Feature for Decomposition", df.columns.tolist())
+        st.plotly_chart(plot_decomposition(df, feature_for_decomp), use_container_width=True)
 
