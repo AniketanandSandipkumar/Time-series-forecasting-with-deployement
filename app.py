@@ -53,7 +53,7 @@ if uploaded_file is not None:
 
     if st.button("Run All Models"):
         with st.spinner("Training models... this may take a while ⏳"):
-            results_df, predictions = train_all_models(df, default_features)
+            results_df, predictions = train_models(df, default_features)
 
         st.success("✅ Training complete!")
 
@@ -71,4 +71,5 @@ if uploaded_file is not None:
                 fig.add_scatter(x=x, y=pd.Series(y_pred).squeeze(),
                                 mode="lines", name="Prediction")
                 st.plotly_chart(fig, use_container_width=True)
+
 
