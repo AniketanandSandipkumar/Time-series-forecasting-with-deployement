@@ -75,6 +75,97 @@ if uploaded_file:
                 ax.plot(x, pred, label=f"{model_name} Prediction")
                 ax.legend()
                 st.pyplot(fig)
+                future_periods = st.sidebar.slider(
+                    f"Select future forecast periods for {model_name} - {feature}", 
+                    5, 60, 30
+                )
+                
+                if model_name in ["ARIMA", "SARIMA"]:
+                    from statsmodels.tsa.arima.model import ARIMA
+                    from statsmodels.tsa.statespace.sarimax import SARIMAX
+                
+                    full_series = df[[feature]].dropna()
+                    if model_name == "ARIMA":
+                        fitted = ARIMA(full_series, order=(1,1,1)).fit()
+                    else:
+                        fitted = SARIMAX(full_series, order=(0,0,18), seasonal_order=(0,1,0,18)).fit(disp=False)
+                
+                    forecast_future = fitted.forecast(steps=future_periods)
+                
+                    st.line_chart(forecast_future, height=300)
+                    st.download_button(
+                        f"📥 Download Future {model_name} Forecast for {feature}",
+                        forecast_future.to_csv().encode("utf-8"),
+                        file_name=f"{feature}_{model_name}_future.csv",
+                        mime="text/csv"
+                    )
+                
+                elif model_name == "Prophet":
+                    from prophet import Prophet
+                    full_series = pd.DataFrame({"ds": df.index, "y": df[feature]})
+                    model = Prophet()
+                    model.fit(full_series)
+                    future = model.make_future_dataframe(periods=future_periods)
+                    forecast = model.predict(future)
+                
+                    fig = px.line(forecast, x="ds", y="yhat", title=f"Future Forecast ({model_name} - {feature})")
+                    st.plotly_chart(fig, use_container_width=True)
+                
+                    st.download_button(
+                        f"📥 Download Future {model_name} Forecast for {feature}",
+                        forecast.to_csv(index=False).encode("utf-8"),
+                        file_name=f"{feature}_{model_name}_future.csv",
+                        mime="text/csv"
+                    )
+                
+                elif model_name == "LSTM":
+                    from sklearn.preprocessing import MinMaxScaler
+                    from tensorflow.keras.models import Sequential
+                    from tensorflow.keras.layers import LSTM, Dense
+                    from tensorflow.keras.preprocessing.sequence import TimeseriesGenerator
+                
+                    # Scale full data
+                    full_series = df[[feature]].dropna()
+                    scaler = MinMaxScaler(feature_range=(0, 1))
+                    scaled_full = scaler.fit_transform(full_series)
+                
+                    n_input = 18
+                    n_features = 1
+                    generator = TimeseriesGenerator(scaled_full, scaled_full, length=n_input, batch_size=1)
+                
+                    # Build model
+                    model = Sequential()
+                    model.add(LSTM(100, activation='relu', return_sequences=True, input_shape=(n_input, n_features)))
+                    model.add(LSTM(50, activation='relu'))
+                    model.add(Dense(1))
+                    model.compile(optimizer='adam', loss='mse')
+                    model.fit(generator, epochs=5, verbose=0)
+                
+                    # Start with last observed batch
+                    current_batch = scaled_full[-n_input:].reshape((1, n_input, n_features))
+                    future_predictions = []
+                
+                    for _ in range(future_periods):
+                        current_pred = model.predict(current_batch, verbose=0)[0]
+                        future_predictions.append(current_pred)
+                        current_batch = np.append(current_batch[:, 1:, :], [[current_pred]], axis=1)
+                
+                    forecast_future = scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1))
+                
+                    # Create forecast dates
+                    last_date = full_series.index[-1]
+                    future_dates = pd.date_range(start=last_date, periods=future_periods+1, freq="D")[1:]
+                
+                    forecast_df = pd.DataFrame({"Date": future_dates, "Predicted": forecast_future.flatten()})
+                
+                    st.line_chart(forecast_df.set_index("Date"))
+                    st.download_button(
+                        f"📥 Download Future {model_name} Forecast for {feature}",
+                        forecast_df.to_csv(index=False).encode("utf-8"),
+                        file_name=f"{feature}_{model_name}_future.csv",
+                        mime="text/csv"
+                    )
+
 
             # --------------------------
             # Download Forecasted Data
@@ -110,6 +201,7 @@ if uploaded_file:
     if st.sidebar.checkbox("Show Decomposition (Trend/Seasonality/Residuals)"):
         feature_for_decomp = st.sidebar.selectbox("Select Feature for Decomposition", df.columns.tolist())
         st.plotly_chart(plot_decomposition(df, feature_for_decomp), use_container_width=True)
+
 
 
 
