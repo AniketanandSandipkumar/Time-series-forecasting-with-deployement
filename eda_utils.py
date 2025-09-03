@@ -1,6 +1,8 @@
 # eda_utils.py
 import plotly.express as px
 from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+import matplotlib.pyplot as plt
 
 def plot_resampling(df, freq="M"):
     """Resample data and plot monthly mean using Plotly."""
@@ -68,7 +70,19 @@ def plot_moving_averages(df, feature="Close"):
     fig.update_layout(title=f"Moving Averages ({feature})", template="plotly_white")
     st.plotly_chart(fig, use_container_width=True)
 
-# Candlestick Chart
+
+def plot_acf_plot(df, lags=50):
+    fig, ax = plt.subplots(figsize=(10, 5))
+    plot_acf(df["Close"].dropna(), lags=lags, ax=ax)
+    plt.title("Autocorrelation (ACF)")
+    return fig
+
+def plot_pacf_plot(df, lags=50):
+    fig, ax = plt.subplots(figsize=(10, 5))
+    plot_pacf(df["Close"].dropna(), lags=lags, ax=ax, method="ywm")
+    plt.title("Partial Autocorrelation (PACF)")
+    return fig
+
 def plot_candlestick(df):
     st.subheader("📊 Candlestick Chart")
     if all(col in df.columns for col in ["Open", "High", "Low", "Close"]):
@@ -84,5 +98,6 @@ def plot_candlestick(df):
         st.plotly_chart(fig, use_container_width=True)
     else:
         st.warning("Candlestick requires Open, High, Low, and Close columns in dataset.")
+
 
 
