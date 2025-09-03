@@ -74,14 +74,14 @@ def plot_moving_averages(df, feature="Close"):
     fig.update_layout(title=f"Moving Averages ({feature})", template="plotly_white")
     return fig
 
-def plot_acf_plot(df, lags=50):
+def plot_acf_plot(df, lags=18):
     """Autocorrelation function plot."""
     fig, ax = plt.subplots(figsize=(10, 5))
     plot_acf(df["Close"].dropna(), lags=lags, ax=ax)
     plt.title("Autocorrelation (ACF)")
     return fig
 
-def plot_pacf_plot(df, lags=50):
+def plot_pacf_plot(df, lags=18):
     """Partial autocorrelation function plot."""
     fig, ax = plt.subplots(figsize=(10, 5))
     plot_pacf(df["Close"].dropna(), lags=lags, ax=ax, method="ywm")
@@ -104,4 +104,5 @@ def plot_candlestick(df):
         return fig
     else:
         return None
+
 
