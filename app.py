@@ -6,7 +6,13 @@ import matplotlib.pyplot as plt
 
 # Import custom modules
 from train_models import train_models   # updated import
-from eda_utils import plot_resampling, plot_rolling, plot_decomposition
+
+from eda_utils import (
+    plot_resampling, plot_rolling, plot_decomposition,
+    plot_candlestick, plot_moving_averages, plot_daily_returns,
+    plot_volume_vs_price, plot_correlation_heatmap,
+    plot_acf_plot, plot_pacf_plot
+)
 
 
 # --------------------------
@@ -200,7 +206,11 @@ if st.sidebar.checkbox("Show Decomposition (Trend/Seasonality/Residuals)", key="
     st.plotly_chart(plot_decomposition(df, feature_for_decomp), use_container_width=True)
 
 if st.sidebar.checkbox("Show Candlestick Chart (OHLC)", key="candlestick"):
-    st.plotly_chart(plot_candlestick(df), use_container_width=True)
+    fig = plot_candlestick(df)
+    if fig:
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.warning("Candlestick requires Open, High, Low, and Close columns.")
 
 if st.sidebar.checkbox("Show Moving Averages (20, 50, 200 days)", key="moving_avg"):
     st.plotly_chart(plot_moving_averages(df), use_container_width=True)
@@ -219,5 +229,3 @@ if st.sidebar.checkbox("Show ACF (Autocorrelation)", key="acf_plot"):
 
 if st.sidebar.checkbox("Show PACF (Partial Autocorrelation)", key="pacf_plot"):
     st.pyplot(plot_pacf_plot(df))
-
-
