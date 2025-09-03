@@ -184,49 +184,39 @@ if uploaded_file:
                 "text/csv"
             )
 
+        
+        
+        st.sidebar.markdown("---")
+        st.sidebar.subheader("🔍 Exploratory Data Analysis")
+        
+        if st.sidebar.checkbox("Show Resampling (Monthly Mean)", key="resampling"):
+            st.plotly_chart(plot_resampling(df), use_container_width=True)
+        
+        if st.sidebar.checkbox("Show Rolling Mean (30 days)", key="rolling"):
+            st.plotly_chart(plot_rolling(df), use_container_width=True)
+        
+        if st.sidebar.checkbox("Show Decomposition (Trend/Seasonality/Residuals)", key="decomposition"):
+            feature_for_decomp = st.sidebar.selectbox("Select Feature for Decomposition", df.columns.tolist(), key="decomp_feature")
+            st.plotly_chart(plot_decomposition(df, feature_for_decomp), use_container_width=True)
+        
+        if st.sidebar.checkbox("Show Candlestick Chart (OHLC)", key="candlestick"):
+            st.plotly_chart(plot_candlestick(df), use_container_width=True)
+        
+        if st.sidebar.checkbox("Show Moving Averages (20, 50, 200 days)", key="moving_avg"):
+            st.plotly_chart(plot_moving_averages(df), use_container_width=True)
+        
+        if st.sidebar.checkbox("Show Daily Returns Distribution", key="daily_returns"):
+            st.plotly_chart(plot_daily_returns(df), use_container_width=True)
+        
+        if st.sidebar.checkbox("Show Volume vs Price Scatter", key="volume_price"):
+            st.plotly_chart(plot_volume_vs_price(df), use_container_width=True)
+        
+        if st.sidebar.checkbox("Show Correlation Heatmap", key="corr_heatmap"):
+            st.plotly_chart(plot_correlation_heatmap(df), use_container_width=True)
+        
+        if st.sidebar.checkbox("Show ACF (Autocorrelation)", key="acf_plot"):
+            st.pyplot(plot_acf_plot(df))
 
-
-    # --------------------------
-    # EDA Tools
-    # --------------------------
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("🔍 Exploratory Data Analysis")
-
-    if st.sidebar.checkbox("Show Resampling (Monthly Mean)"):
-        st.plotly_chart(plot_resampling(df), use_container_width=True)
-
-    if st.sidebar.checkbox("Show Rolling Mean (30 days)"):
-        st.plotly_chart(plot_rolling(df), use_container_width=True)
-
-    if st.sidebar.checkbox("Show Decomposition (Trend/Seasonality/Residuals)"):
-        feature_for_decomp = st.sidebar.selectbox("Select Feature for Decomposition", df.columns.tolist())
-        st.plotly_chart(plot_decomposition(df, feature_for_decomp), use_container_width=True)
-
-    if st.sidebar.checkbox("Show Resampling (Monthly Mean)"):
-        st.plotly_chart(plot_resampling(df), use_container_width=True)
-    
-    if st.sidebar.checkbox("Show Rolling Mean (30 days)"):
-        st.plotly_chart(plot_rolling(df), use_container_width=True)
-    
-    if st.sidebar.checkbox("Show Decomposition (Trend/Seasonality/Residuals)"):
-        feature_for_decomp = st.sidebar.selectbox("Select Feature for Decomposition", df.columns.tolist())
-        st.plotly_chart(plot_decomposition(df, feature_for_decomp), use_container_width=True)
-    
-    if st.sidebar.checkbox("Show Candlestick Chart (OHLC)"):
-        st.plotly_chart(plot_candlestick(df), use_container_width=True)
-    
-    if st.sidebar.checkbox("Show Moving Averages (20, 50, 200 days)"):
-        st.plotly_chart(plot_moving_averages(df), use_container_width=True)
-    
-    if st.sidebar.checkbox("Show Daily Returns Distribution"):
-        st.plotly_chart(plot_daily_returns(df), use_container_width=True)
-    
-    if st.sidebar.checkbox("Show Volume vs Price Scatter"):
-        st.plotly_chart(plot_volume_vs_price(df), use_container_width=True)
-    
-    if st.sidebar.checkbox("Show Correlation Heatmap"):
-        st.plotly_chart(plot_correlation_heatmap(df), use_container_width=True)
-
-
-
+        if st.sidebar.checkbox("Show PACF (Partial Autocorrelation)", key="pacf_plot"):
+            st.pyplot(plot_pacf_plot(df))
 
