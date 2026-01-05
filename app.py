@@ -20,30 +20,6 @@ from eda_utils import (
 # --------------------------
 st.set_page_config(page_title="Stock Forecasting", layout="wide")
 st.title("📈 Time Series Forecasting Dashboard")
-# ==============================
-# Business Intelligence (Power BI)
-# ==============================
-st.markdown("---")
-st.subheader("📊 Business Intelligence (Power BI)")
-
-show_pbi = st.checkbox("Show Power BI Dashboard")
-
-if show_pbi:
-    st.info("🔗 Business-level insights powered by Power BI")
-
-    powerbi_url = (
-        "https://app.powerbi.com/reportEmbed?"
-        "reportId=28e7b891-36e2-417d-b287-21e5983c7caa"
-        "&autoAuth=true"
-        "&ctid=b10b7583-c2ed-4f35-8815-ed38d24ed1be"
-    )
-
-    st.components.v1.iframe(
-        src=powerbi_url,
-        width=1300,
-        height=800,
-        scrolling=True
-    )
 
 # --------------------------
 # File Upload
@@ -65,6 +41,29 @@ if uploaded_file:
     )
     df_filtered = df.loc[start_date:]
     st.dataframe(df_filtered)
+    # ==============================
+    # Business Intelligence (Power BI)
+    # ==============================
+    st.markdown("---")
+    st.subheader("📊 Business Intelligence Dashboard (Power BI)")
+
+    show_pbi = st.checkbox("Show Executive Power BI Dashboard")
+
+    if show_pbi:
+         st.info("🔍 Executive-level insights complementing ML forecasting")
+
+        powerbi_url = (
+           "https://app.powerbi.com/reportEmbed?"
+           "reportId=28e7b891-36e2-417d-b287-21e5983c7caa"
+           "&autoAuth=true"
+           "&ctid=b10b7583-c2ed-4f35-8815-ed38d24ed1be"
+         )
+
+        st.components.v1.iframe(
+             src=powerbi_url,
+             width=1300,
+            height=800
+         )
 
     # --------------------------
     # Sidebar Options
@@ -252,4 +251,5 @@ if st.sidebar.checkbox("Show ACF (Autocorrelation)", key="acf_plot"):
 
 if st.sidebar.checkbox("Show PACF (Partial Autocorrelation)", key="pacf_plot"):
     st.pyplot(plot_pacf_plot(df))
+
 
