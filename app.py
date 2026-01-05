@@ -20,7 +20,30 @@ from eda_utils import (
 # --------------------------
 st.set_page_config(page_title="Stock Forecasting", layout="wide")
 st.title("📈 Time Series Forecasting Dashboard")
+# ==============================
+# Business Intelligence (Power BI)
+# ==============================
+st.markdown("---")
+st.subheader("📊 Business Intelligence (Power BI)")
 
+show_pbi = st.checkbox("Show Power BI Dashboard")
+
+if show_pbi:
+    st.info("🔗 Business-level insights powered by Power BI")
+
+    powerbi_url = (
+        "https://app.powerbi.com/reportEmbed?"
+        "reportId=28e7b891-36e2-417d-b287-21e5983c7caa"
+        "&autoAuth=true"
+        "&ctid=b10b7583-c2ed-4f35-8815-ed38d24ed1be"
+    )
+
+    st.components.v1.iframe(
+        src=powerbi_url,
+        width=1300,
+        height=800,
+        scrolling=True
+    )
 
 # --------------------------
 # File Upload
@@ -229,31 +252,4 @@ if st.sidebar.checkbox("Show ACF (Autocorrelation)", key="acf_plot"):
 
 if st.sidebar.checkbox("Show PACF (Partial Autocorrelation)", key="pacf_plot"):
     st.pyplot(plot_pacf_plot(df))
-
-
-# ==============================
-# Business Intelligence (Power BI)
-# ==============================
-st.sidebar.markdown("---")
-st.sidebar.subheader("📊 Business Intelligence (Power BI)")
-
-show_pbi = st.sidebar.checkbox("Show Power BI Dashboard", key="pbi_toggle")
-
-if show_pbi:
-    st.subheader("📊 Power BI Dashboard – Stock Forecast Insights")
-
-    powerbi_url = (
-        "https://app.powerbi.com/reportEmbed?"
-        "reportId=28e7b891-36e2-417d-b287-21e5983c7caa"
-        "&autoAuth=true"
-        "&ctid=b10b7583-c2ed-4f35-8815-ed38d24ed1be"
-    )
-
-    st.components.v1.iframe(
-        src=powerbi_url,
-        width=1200,
-        height=750,
-        scrolling=True
-    )
-
 
