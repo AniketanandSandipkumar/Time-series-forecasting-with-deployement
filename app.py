@@ -52,18 +52,18 @@ if uploaded_file:
     if show_pbi:
          st.info("🔍 Executive-level insights complementing ML forecasting")
 
-        powerbi_url = (
+         powerbi_url = (
            "https://app.powerbi.com/reportEmbed?"
            "reportId=28e7b891-36e2-417d-b287-21e5983c7caa"
            "&autoAuth=true"
            "&ctid=b10b7583-c2ed-4f35-8815-ed38d24ed1be"
-         )
+          )
 
-        st.components.v1.iframe(
+         st.components.v1.iframe(
              src=powerbi_url,
              width=1300,
             height=800
-         )
+          )
 
     # --------------------------
     # Sidebar Options
@@ -251,5 +251,6 @@ if st.sidebar.checkbox("Show ACF (Autocorrelation)", key="acf_plot"):
 
 if st.sidebar.checkbox("Show PACF (Partial Autocorrelation)", key="pacf_plot"):
     st.pyplot(plot_pacf_plot(df))
+
 
 
