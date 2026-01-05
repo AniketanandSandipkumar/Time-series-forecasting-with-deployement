@@ -229,3 +229,18 @@ if st.sidebar.checkbox("Show ACF (Autocorrelation)", key="acf_plot"):
 
 if st.sidebar.checkbox("Show PACF (Partial Autocorrelation)", key="pacf_plot"):
     st.pyplot(plot_pacf_plot(df))
+
+st.sidebar.subheader("📊 Business Intelligence (Power BI)")
+
+show_pbi = st.sidebar.checkbox("Show Power BI Dashboard")
+if show_pbi:
+    st.subheader("📊 Power BI Dashboard – Stock Forecast Insights")
+
+    powerbi_url = "https://app.powerbi.com/reportEmbed?reportId=28e7b891-36e2-417d-b287-21e5983c7caa&autoAuth=true&ctid=b10b7583-c2ed-4f35-8815-ed38d24ed1be"
+
+    st.components.v1.iframe(
+        src=powerbi_url,
+        width=1200,
+        height=750,
+        scrolling=True
+    )
