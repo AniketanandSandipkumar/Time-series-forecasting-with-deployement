@@ -1,4 +1,4 @@
-# 📈 Time Series Forecasting with Deployment
+📈Time Series Forecasting with Deployment
 
 An **end-to-end Time Series Forecasting application** that integrates **statistical models, deep learning, interactive data visualization, and business intelligence dashboards** into a single deployable solution.
 
@@ -6,7 +6,7 @@ This project demonstrates the **complete data science lifecycle** — from explo
 
 ---
 
-## 🚀 Key Features
+🚀 Key Features
 
 - 📊 Interactive **Streamlit dashboard**
 - 📈 Multiple **forecasting models**
@@ -19,7 +19,7 @@ This project demonstrates the **complete data science lifecycle** — from explo
 
 ---
 
-## 🧠 Forecasting Models Used
+🧠 Forecasting Models Used
 
 | Model   | Description |
 |--------|-------------|
@@ -36,7 +36,7 @@ Each model supports:
 
 ---
 
-## 📊 Exploratory Data Analysis (EDA)
+📊 Exploratory Data Analysis (EDA)
 
 The application provides rich EDA capabilities, including:
 
@@ -54,7 +54,7 @@ All EDA features are **interactive and controlled from the sidebar**.
 
 ---
 
-## 📊 Business Intelligence (Power BI)
+📊 Business Intelligence (Power BI)
 
 This project uniquely integrates **Power BI** within a machine learning application.
 
@@ -68,7 +68,7 @@ The Power BI report is embedded directly inside the Streamlit app using an ifram
 
 ---
 
-## 🖥️ Application Workflow
+🖥️ Application Workflow
 
 1. Upload a stock price CSV file
 2. View and filter the dataset
@@ -81,8 +81,8 @@ The Power BI report is embedded directly inside the Streamlit app using an ifram
 
 ---
 
-## 📁 Project Structure
-Time-series-forecasting-with-deployment/<br><br>
+📁 Project Structure
+Time-series-forecasting-with-deployment/  
 │
 ├── app.py # Main Streamlit application<br>
 ├── train_models.py # Model training & evaluation logic<br>
@@ -94,7 +94,7 @@ Time-series-forecasting-with-deployment/<br><br>
 
 ---
 
-## 🛠️ Tech Stack
+🛠️ Tech Stack
 
 ### Programming & Libraries
 - Python
@@ -119,20 +119,20 @@ Time-series-forecasting-with-deployment/<br><br>
 
 ---
 
-## ⚙️ Installation & Usage
+⚙️ Installation & Usage
 
-### 1️⃣ Clone the Repository
-git clone https://github.com/your-username/Time-series-forecasting-with-deployment.git
+1️⃣ Clone the Repository
+git clone https://github.com/your-username/Time-series-forecasting-with-deployment.git  
 cd Time-series-forecasting-with-deployment
 
-2️⃣ Install Dependencies
-pip install -r requirements.txt
+2️⃣ Install Dependencies  
+pip install -r requirements.txt  
 
-3️⃣ Run the Application
+3️⃣ Run the Application  
 streamlit run app.py
 
-📥 Input Data Format-
-The uploaded CSV file should contain:
+📥 Input Data Format-  
+The uploaded CSV file should contain:  
 A datetime index<br>
 Stock-related columns such as:<br>
 Open<br>
@@ -142,23 +142,18 @@ Close<br>
 Volume<br>
 
 Example:<br>
-
 Date,Open,High,Low,Close,Volume<br>
 2023-01-01,120,125,118,123,1000000<br>
 
 🌟 Why This Project Matters:<br>
-
 -Demonstrates real-world data science workflow<br>
-
 -Combines ML, DL, visualization, and BI<br>
-
 -Production-ready and deployable<br>
-
 -Suitable for internships, final-year projects, and portfolios<br>
-
 -Strong focus on both technical depth and business insights<br>
 
 👨‍💻 Author<br>
 Aniketanand Sandipkumar<br>
-Final-year B.Tech (Computer Science)
+Final-year B.Tech (Computer Science)<br>
 App Link:https://time-series-forecasting-with-deployement-fpra5tvjd4ekczbmmtvr3.streamlit.app/
+
