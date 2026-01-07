@@ -81,16 +81,15 @@ The Power BI report is embedded directly inside the Streamlit app using an ifram
 
 ---
 
-📁 Project Structure
+📁 Project Structure  
 Time-series-forecasting-with-deployment/  
-│
+│  
 ├── app.py # Main Streamlit application<br>
 ├── train_models.py # Model training & evaluation logic<br>
 ├── eda_utils.py # EDA & visualization utilities<br>
 ├── requirements.txt # Python dependencies<br>
 ├── README.md # Project documentation<br>
 └── .devcontainer/ # Development container setup <br>
-
 
 ---
 
@@ -119,7 +118,7 @@ Time-series-forecasting-with-deployment/
 
 ---
 
-⚙️ Installation & Usage
+⚙️ Installation & Usage  
 
 1️⃣ Clone the Repository
 git clone https://github.com/your-username/Time-series-forecasting-with-deployment.git  
@@ -155,5 +154,6 @@ Date,Open,High,Low,Close,Volume<br>
 👨‍💻 Author<br>
 Aniketanand Sandipkumar<br>
 Final-year B.Tech (Computer Science)<br>
-App Link:https://time-series-forecasting-with-deployement-fpra5tvjd4ekczbmmtvr3.streamlit.app/
+🔗App Link:https://time-series-forecasting-with-deployement-fpra5tvjd4ekczbmmtvr3.streamlit.app/
+
 
