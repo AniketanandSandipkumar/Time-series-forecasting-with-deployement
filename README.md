@@ -120,7 +120,7 @@ Time-series-forecasting-with-deployment/
 
 ⚙️ Installation & Usage  
 
-1️⃣ Clone the Repository
+1️⃣ Clone the Repository  
 git clone https://github.com/your-username/Time-series-forecasting-with-deployment.git  
 cd Time-series-forecasting-with-deployment
 
@@ -132,7 +132,7 @@ streamlit run app.py
 
 📥 Input Data Format-  
 The uploaded CSV file should contain:  
-A datetime index<br>
+A datetime index<br><br>
 Stock-related columns such as:<br>
 Open<br>
 High<br>
@@ -155,5 +155,6 @@ Date,Open,High,Low,Close,Volume<br>
 Aniketanand Sandipkumar<br>
 Final-year B.Tech (Computer Science)<br>
 🔗App Link:https://time-series-forecasting-with-deployement-fpra5tvjd4ekczbmmtvr3.streamlit.app/
+
 
 
